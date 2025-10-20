@@ -3,6 +3,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ConnectWallet } from "./ConnectWallet"; // Import the new component
 
 export function Header() {
   return (
@@ -26,9 +27,7 @@ export function Header() {
 
           <ThemeToggle />
 
-          <Button variant="default" size="sm">
-            Connect Wallet
-          </Button>
+          <ConnectWallet /> {/* Replace the static Button */}
         </div>
       </div>
     </header>
