@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, Cpu, Coins, ArrowRight, Zap, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+// import * as Sentry from '@sentry/react'; // Uncomment and configure Sentry for error reporting
 import { getEcosystemHealth } from "@/api/queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import EntryPointCard from "@/components/dashboard/EntryPointCard"; // Will be created next
@@ -25,9 +26,30 @@ const MetricCardSkeleton = () => (
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  const { data, isLoading, isError, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useQuery({
     queryKey: ['ecosystemHealth'],
-    queryFn: getEcosystemHealth,
+    queryFn: async () => {
+      try {
+        const result = await getEcosystemHealth();
+        return result;
+      } catch (err) {
+        // Optionally report error to Sentry or another service
+        // Sentry.captureException(err);
+        throw err;
+      }
+    },
+    retry: 2, // Retry failed requests up to 2 times
+    onError: (err) => {
+      // Optionally report error to Sentry or another service
+      // Sentry.captureException(err);
+      console.error('Error fetching ecosystem health:', err);
+    },
   });
 
   return (
@@ -47,7 +69,13 @@ export default function Dashboard() {
               <AlertTriangle className="w-6 h-6 text-destructive" />
               <div>
                 <p className="font-bold">Error Loading Data</p>
-                <p className="text-sm text-destructive/80">{error.message}</p>
+                <p className="text-sm text-destructive/80">{error?.message || 'Unknown error occurred.'}</p>
+                <button
+                  className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
+                  onClick={() => refetch()}
+                >
+                  Retry
+                </button>
               </div>
             </CardContent>
           </Card>
